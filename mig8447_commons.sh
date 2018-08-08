@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Exit Code Meanings
+# 0 - Success
+# 1 - Unrecoverable Error
+# 2 - Recoverable Error
+
 function get_real_script_directory {
     local exit_code=0
 
@@ -23,11 +28,45 @@ function get_real_script_directory {
     return "$exit_code"
 }
 
+function add_path_to_path {
+    local exit_code=0
+
+    local path_to_add="$1"
+    local prepend="${2:-false}"
+
+    if [[ ! -e "$path_to_add" ]]; then
+        echo 'WARNING: '"${FUNCNAME[0]}"': The passed path_to_add ($1) does not exist' >&2
+        exit_code=2
+    fi
+
+    if [[ ':'"$PATH"':' != *':'"$path_to_prepend"':'* ]]; then
+        if [[ "$prepend" == "false" ]]; then
+            export PATH="$PATH"':'"$path_to_add"
+        else
+            export PATH="$path_to_add"':'"$PATH"
+        fi
+    else
+        echo 'WARNING: '"${FUNCNAME[0]}"': The passed path_to_add ($1) was part of the $PATH already' >&2
+        exit_code=2
+    fi
+
+    return "$exit_code"
+}
+
+function append_path_to_path {
+    add_path_to_path "$1"
+    return "$?"
+}
+function prepend_path_to_path {
+    add_path_to_path "$1" 'true'
+    return "$?"
+}
+
 function get_quoted_variable {
+    local exit_code=0
+
     local variable_name="$1"
     local export_variable="${2:-false}"
-
-    local exit_code=0
 
     if [[ -n "$variable_name" ]]; then
         if [[ "$export_variable" == "true" ]]; then
@@ -44,3 +83,5 @@ function get_quoted_variable {
 
 export -f get_real_script_directory
 export -f get_quoted_variable
+export -f append_path_to_path
+export -f prepend_path_to_path
