@@ -1,6 +1,8 @@
 #!/bin/bash
 
 function get_real_script_directory {
+    local exit_code=0
+
     # According to the Bash documentation, the ${BASH_SOURCE[$i]} is the name
     # of the file defining the current function and ${BASH_SOURCE[$i+1]} is
     # the name of the file calling the function, that's why we use
@@ -17,6 +19,8 @@ function get_real_script_directory {
     fi
 
     echo "$real_script_directory"
+    
+    return "$exit_code"
 }
 
 function get_quoted_variable {
