@@ -39,7 +39,7 @@ function add_path_to_path {
         exit_code=2
     fi
 
-    if [[ ':'"$PATH"':' != *':'"$path_to_prepend"':'* ]]; then
+    if [[ ':'"$PATH"':' != *':'"$path_to_add"':'* ]]; then
         if [[ "$prepend" == "false" ]]; then
             export PATH="$PATH"':'"$path_to_add"
         else
