@@ -1,5 +1,10 @@
 #!/bin/bash
 
+script_name='mig8447_commons.sh'
+script_human_readable_name='mig8447 Bash Commons'
+script_description='A Common Functions Library for Bash'
+script_version='1.2.0'
+
 # Exit Code Meanings
 # 0 - Success
 # 1 - Unrecoverable Error
