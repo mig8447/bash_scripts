@@ -81,7 +81,13 @@ function get_quoted_variable {
     return "$exit_code"
 }
 
+function get_alias_string(){
+    local result=$( alias "$1"  | sed -re 's/^[^=]+?=//' )
+    eval 'echo '"$result"
+}
+
 export -f get_real_script_directory
 export -f get_quoted_variable
 export -f append_path_to_path
 export -f prepend_path_to_path
+export -f get_alias_string
