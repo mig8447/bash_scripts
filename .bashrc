@@ -3,9 +3,19 @@
 _os_name="$( uname -s )"
 export _os_name
 
-if [[ "$-" =~ "i" ]] && [[ -t 0 ]] && [[ -t 1 ]] && [[ -t 2 ]]; then
-    export _is_interactive_shell=true
+function _is_interactive_shell(){
+    local exit_code=0
 
+    [[ "$-" =~ "i" && -t 0 && -t 1 && -t 2 ]]        
+    exit_code="$?"
+
+    return "$exit_code"
+}
+
+_is_interactive_shell
+export _is_interactive_shell="$?"
+
+if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Enable forward history search
     # NOTE: This should be done in .bashrc.d/*history.sh but it only works if
     #       set here
@@ -43,3 +53,4 @@ done < <(
 # shellcheck disable=SC1090
 test -e "${HOME}/.iterm2_shell_integration.bash" \
     && source "${HOME}/.iterm2_shell_integration.bash"
+

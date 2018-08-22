@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Only set these aliases if shell is interactive
-if [[ "${_is_interactive_shell:-false}" == true ]]; then
+# shellcheck disable=SC2154
+if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Allow alias expansion
     shopt -s expand_aliases
 
@@ -43,6 +44,12 @@ if [[ "${_is_interactive_shell:-false}" == true ]]; then
 "'"'set paste'"'"' -c '"'"'startinsert'"'"
     # Edit the .bashrc file
     alias vimrc='vim "$HOME"'"'"'/.bashrc'"'"
+    # Edit the .bashrc.d directory
+    alias vimrcd='vim "$HOME"'"'"'/.bashrc.d'"'"
+    # Interactive alias for rm
+    alias rm='confirm_rm'
+
+    alias md5sum='md5'
 
     # Git aliases
     # Git Fast Push

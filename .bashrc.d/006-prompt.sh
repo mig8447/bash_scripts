@@ -29,7 +29,8 @@ function _set_prompt {
     return "$exit_code"
 }
 
-if [[ "${_is_interactive_shell:-false}" == true ]]; then
+# shellcheck disable=SC2154
+if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Set the proxy, set the prompt and dump every command to history
     # immediately
     export PROMPT_COMMAND="_set_prompt; history -a;"
