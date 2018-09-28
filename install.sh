@@ -4,7 +4,7 @@ exit_code=0
 
 script_directory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if real_script_path="$( readlink -e "$script_directory/$( basename
+if real_script_path="$( readlink -e "$script_directory/$( basename \
     "${BASH_SOURCE[0]}" )" )"
 then
     real_script_directory="$( dirname "$real_script_path" )"
@@ -17,6 +17,8 @@ fi
 mkdir -p "$real_script_directory"'/lib'
 ln -fns "$real_script_directory"'/lib/mig8447_commons.sh' \
     "$HOME"'/lib/mig8447_commons.sh'
+ln -fns "$real_script_directory"'/lib/isiterm2.sh' \
+    "$HOME"'/lib/isiterm2.sh'
 ln -fns "$real_script_directory"'/.bashrc' "$HOME"'/.bashrc'
 ln -fns "$real_script_directory"'/.bashrc.d/' "$HOME"'/.bashrc.d'
 ln -fns "$real_script_directory"'/.bash_profile' "$HOME"'/.bash_profile'

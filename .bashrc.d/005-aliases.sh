@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Only set these aliases if shell is interactive
-# shellcheck disable=SC2154
+# Set aliases only if this is an interactive shell
 if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Allow alias expansion
     shopt -s expand_aliases
@@ -46,16 +45,24 @@ if [[ "$_is_interactive_shell" -eq 0 ]]; then
     alias vimrc='vim "$HOME"'"'"'/.bashrc'"'"
     # Source the .bashrc file
     alias sourcerc='source "$HOME"'"'"'/.bashrc'"'"
-    # Edit the .bashrc.d directory
-    alias vimrcd='vim -c '"'"'e '"'"'"$HOME"'"'"'/.bashrc.d'"'"
     # Interactive alias for rm
     alias rm='confirm_rm'
 
-    alias md5sum='md5'
+    case "${_os_name:-Linux}" in
+        Linux )
+            alias md5='md5sum'
+            ;;
+        Darwin )
+            alias md5sum='md5'
+            ;;
+    esac
+
+    # Disable all SSH auth methods except password
+    alias sshpw='ssh -o PreferredAuthentications=password'
 
     # Git aliases
     # Git Fast Push
-    alias gitfp='git add . && { read -p '"'"'Commit Message: '"'"' -a '\
+    alias gitfp='git add --all . && { read -p '"'"'Commit Message: '"'"' -a '\
 '_git_commit_message && git commit -m "${_git_commit_message[*]}"; '\
 'unset _git_commit_message; } && git push'
 fi

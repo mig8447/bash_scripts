@@ -1,10 +1,14 @@
 #!/bin/bash
 
 # If we are using iTerm then source the file first
-# iTerm2 - Shell Integrations
+# iTerm 2 - Shell Integrations
+# iTerm 2 Client Check based on https://gist.github.com/joerohde/b7a07db9ff9d1641bd3c7c2abbe2828d 
 # shellcheck disable=SC1090
-test -e "${HOME}/.iterm2_shell_integration.bash" \
-    && source "${HOME}/.iterm2_shell_integration.bash"
+{ 
+    "$HOME"'/lib/isiterm2.sh' \
+        && test -e "${HOME}/.iterm2_shell_integration.bash" \
+        && source "${HOME}/.iterm2_shell_integration.bash";
+} || ( exit 0 )
 
 _os_name="$( uname -s )"
 export _os_name
@@ -21,14 +25,15 @@ function _is_interactive_shell(){
 _is_interactive_shell
 export _is_interactive_shell="$?"
 
+# Enable these setings only if the terminal is interactive
 if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Enable forward history search
-    # NOTE: This should be done in .bashrc.d/*history.sh but it only works if
-    #       set here
+    # NOTE: This setting should be in the .bashrc.d/*history.sh file
+    #       but it only works if called directly from here
     stty -ixon
 fi
 
-# Import common bash functions
+# Import common Bash functions
 # shellcheck disable=SC1090
 source "$HOME"'/lib/mig8447_commons.sh'
 
