@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# If we are using iTerm then source the file first
+# iTerm2 - Shell Integrations
+# shellcheck disable=SC1090
+test -e "${HOME}/.iterm2_shell_integration.bash" \
+    && source "${HOME}/.iterm2_shell_integration.bash"
+
 _os_name="$( uname -s )"
 export _os_name
 
@@ -49,8 +55,4 @@ done < <(
         esac
     )
 
-# iTerm2 - Shell Integrations
-# shellcheck disable=SC1090
-test -e "${HOME}/.iterm2_shell_integration.bash" \
-    && source "${HOME}/.iterm2_shell_integration.bash"
 

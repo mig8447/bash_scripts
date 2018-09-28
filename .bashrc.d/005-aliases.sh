@@ -44,8 +44,10 @@ if [[ "$_is_interactive_shell" -eq 0 ]]; then
 "'"'set paste'"'"' -c '"'"'startinsert'"'"
     # Edit the .bashrc file
     alias vimrc='vim "$HOME"'"'"'/.bashrc'"'"
+    # Source the .bashrc file
+    alias sourcerc='source "$HOME"'"'"'/.bashrc'"'"
     # Edit the .bashrc.d directory
-    alias vimrcd='vim "$HOME"'"'"'/.bashrc.d'"'"
+    alias vimrcd='vim -c '"'"'e '"'"'"$HOME"'"'"'/.bashrc.d'"'"
     # Interactive alias for rm
     alias rm='confirm_rm'
 
