@@ -8,7 +8,13 @@ if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Default Text Editor
     export EDITOR=vim
 
+    case "$_os_name" in
+        ( Linux )
+            shopt -s direxpand
+            ;;
+    esac
+    
     # Expand variables to their contents when tabbing
-    shopt -s direxpand cdable_vars
+    shopt -s cdable_vars
 fi
 

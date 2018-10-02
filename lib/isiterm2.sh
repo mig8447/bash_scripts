@@ -7,8 +7,15 @@ if [ ! -t 1 ] ; then
   exit 1
 fi
 
+os_name=""
+if uname -o &>/dev/null; then
+    os_name="$( uname -o )"
+else
+    os_name="$( uname -s )"
+fi
+
 # bail until Bash/git for windows compat is fixed
-if [ "$(uname -o)" == "Msys" ]; then
+if [ "$os_name" == "Msys" ]; then
    exit 1
 fi
 

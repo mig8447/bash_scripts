@@ -1,15 +1,5 @@
 #!/bin/bash
 
-# If we are using iTerm then source the file first
-# iTerm 2 - Shell Integrations
-# iTerm 2 Client Check based on https://gist.github.com/joerohde/b7a07db9ff9d1641bd3c7c2abbe2828d 
-# shellcheck disable=SC1090
-{ 
-    "$HOME"'/lib/isiterm2.sh' \
-        && test -e "${HOME}/.iterm2_shell_integration.bash" \
-        && source "${HOME}/.iterm2_shell_integration.bash";
-} || ( exit 0 )
-
 _os_name="$( uname -s )"
 export _os_name
 
@@ -60,4 +50,13 @@ done < <(
         esac
     )
 
+# If we are using iTerm then source the file first
+# iTerm 2 - Shell Integrations
+# iTerm 2 Client Check based on https://gist.github.com/joerohde/b7a07db9ff9d1641bd3c7c2abbe2828d 
+# shellcheck disable=SC1090
+{ 
+    "$HOME"'/lib/isiterm2.sh' \
+        && test -e "${HOME}/.iterm2_shell_integration.bash" \
+        && source "${HOME}/.iterm2_shell_integration.bash";
+} || ( exit 0 )
 

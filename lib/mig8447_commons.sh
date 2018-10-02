@@ -6,6 +6,9 @@
 #
 # Changelog:
 #    MODIFIED    VERSION    (MM/DD/YYYY)
+#    mig8447     1.2.2      10/01/2018 - Moved *path function messages to
+#                                        only be shown on debug mode
+#                                      - Added bash_log* functions
 #    mig8447     1.2.1      08/10/2018 - Improved logging
 #                                      - Made script conform to shellcheck's
 #                                        style guidelines
@@ -33,6 +36,99 @@
 # 0 - Success
 # 1 - Unrecoverable Error
 # 2 - Recoverable Error
+
+# Returns 0 if debug is enabled and 1 if it isn't
+function is_debug_enabled {
+    local exit_code=1
+
+    if [[ -n "${DEBUG+set}" ]]; then
+        if [[ "$DEBUG" == true ]] || grep -iE 'true|y(es)?|1'; then
+            exit_code=0
+        fi
+    fi
+
+    return "$exit_code"
+}
+
+function bash_log {
+    local exit_code=0
+
+    # INFO, DEBUG, WARNING, ERROR, etc...
+    local level="${1:-INFO}"
+    shift
+
+    local date_time
+    local script_file_name
+    local call_depth=1
+    local caller_function_name
+    local caller_function_line_number
+
+    caller_function_name="${FUNCNAME[$call_depth]}"
+    while [[ "$caller_function_name" =~ bash_log_.* ]]; do
+        call_depth="$(( call_depth + 1 ))"
+        caller_function_name="${FUNCNAME[$call_depth]}"
+    done
+
+    date_time="$( date +"%Y-%m-%d %H:%M:%S %Z" )"
+    script_file_name="$( basename "${BASH_SOURCE[0]}" )"
+    caller_function_line_number="${BASH_LINENO[$call_depth]}"
+
+    (
+        set -e
+
+        echo -n "$date_time"
+        echo -n $'\t'"$level"':'
+        is_debug_enabled \
+            && {
+                echo -n $'\t'
+                [[ -n "$script_file_name" ]] \
+                    && echo -n "$script_file_name"': '
+                [[ -n "$caller_function_name" ]] \
+                    && echo -n "$caller_function_name"': '
+                [[ -n "$caller_function_line_number" ]] \
+                    && echo -n 'Line '"$caller_function_line_number"':'
+            }
+        echo -n $'\t'"$@"
+        echo -n $'\n'
+    )
+    exit_code="$?"
+
+    return "$exit_code"
+}
+
+function bash_log_debug {
+    local exit_code=0
+
+    is_debug_enabled \
+        && bash_log "DEBUG" "$@"
+    exit_code="$?"
+
+    return "$exit_code"
+}
+function bash_log_info {
+    local exit_code=0
+
+    bash_log "INFO" "$@"
+    exit_code="$?"
+
+    return "$exit_code"
+}
+function bash_log_warning {
+    local exit_code=0
+
+    bash_log "WARNING" "$@"
+    exit_code="$?"
+
+    return "$exit_code"
+}
+function bash_log_error {
+    local exit_code=0
+
+    bash_log "ERROR" "$@"
+    exit_code="$?"
+
+    return "$exit_code"
+}
 
 function get_real_script_directory {
     local exit_code=0
@@ -67,8 +163,8 @@ function add_path_to_path {
     local prepend="${2:-false}"
 
     if [[ ! -e "$path_to_add" ]]; then
-        echo 'WARNING: '"${FUNCNAME[0]}"': The passed path_to_add '\
-"'$path_to_add'"' does not exist' >&2
+        is_debug_enabled && bash_log_warning 'The passed path_to_add' \
+            "'$path_to_add'"' does not exist'
         exit_code=2
     fi
 
@@ -80,8 +176,8 @@ function add_path_to_path {
         fi
     else
         # shellcheck disable=SC2016
-        echo 'WARNING: '"${FUNCNAME[0]}"': The passed path_to_add '\
-"'$path_to_add'"' was part of the $PATH already' >&2
+        is_debug_enabled && bash_log_warning 'The passed path_to_add' \
+            "'$path_to_add'"' was part of the $PATH already' >&2
         exit_code=2
     fi
 
