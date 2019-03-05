@@ -48,6 +48,9 @@ if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Interactive alias for rm
     alias rm='confirm_rm'
 
+    alias recterm='record_terminal'
+    alias playterm='play_terminal_recording'
+
     case "${_os_name:-Linux}" in
         Linux )
             alias md5='md5sum'
@@ -59,6 +62,10 @@ if [[ "$_is_interactive_shell" -eq 0 ]]; then
 
     # Disable all SSH auth methods except password
     alias sshpw='ssh -o PreferredAuthentications=password'
+
+    if command -v exiftool &> /dev/null; then
+        alias rmexif='exiftool -all='
+    fi
 
     # Git aliases
     # Git Fast Push

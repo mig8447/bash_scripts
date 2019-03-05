@@ -50,9 +50,8 @@ done < <(
         esac
     )
 
-# If we are using iTerm then source the file first
-# iTerm 2 - Shell Integrations
-# iTerm 2 Client Check based on https://gist.github.com/joerohde/b7a07db9ff9d1641bd3c7c2abbe2828d 
+# iTerm2 - Shell Integrations
+# iTerm2 Client Check based on https://gist.github.com/joerohde/b7a07db9ff9d1641bd3c7c2abbe2828d 
 # shellcheck disable=SC1090
 { 
     "$HOME"'/lib/isiterm2.sh' \
