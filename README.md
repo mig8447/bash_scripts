@@ -4,7 +4,7 @@ A repository for Bash scripts I've written over time.
 ## Functions
 
 ### `record_terminal` (alias `recterm`)
-![Date Added: 04-MAR-19](https://img.shields.io/badge/date%20added-04--MAR--19-lightgrey.svg)
+![](https://img.shields.io/badge/date%20added-04--MAR--19-lightgrey.svg)
 
 This function is a wrapper of the `script` program included in several *UNIX-like* operating systems/distributions. It records the terminal session capturing timing information to be played later via [`play_terminal_recording`](#play_terminal_recording-alias-playterm).
 
@@ -48,7 +48,7 @@ Parameters for this function are positional:
 This wrapper, for most cases, will return the exit codes provided by the `script` tool. The only case on which it will return the custom exit code 1 is whenever the file pair that the user is trying to write to already exists, this preventing the user from overwriting or appending output to a file when using this wrapper because that's usually not the desired behavior.
 
 ### `play_terminal_recording` (alias `playterm`)
-![Date Added: 04-MAR-19](https://img.shields.io/badge/date%20added-04--MAR--19-lightgrey.svg)
+![](https://img.shields.io/badge/date%20added-04--MAR--19-lightgrey.svg)
 
 This function is a wrapper of the `scriptreplay` program included in several *UNIX-like* operating systems/distributions. It plays-back a terminal session recorded using [`record_terminal`](#record_terminal-alias-recterm) function.
 
