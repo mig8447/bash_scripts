@@ -1,2 +1,4 @@
 .bashrc.d/jekyll.sh
 .bashrc.d/001-proxy.sh
+.vim/.netrwhist
+**/.DS_Store

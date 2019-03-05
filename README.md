@@ -6,7 +6,7 @@ A repository for Bash scripts I've written over time.
 ### `record_terminal` (alias `recterm`)
 ![Date Added: 04-MAR-19](https://img.shields.io/badge/date%20added-04--MAR--19-lightgrey.svg)
 
-This function is a wrapper of the `script` program included in several *UNIX-like* operating systems/distributions. It records the terminal session capturing timing information to be played later via [`play_terminal_recording`](#play_terminal_recording).
+This function is a wrapper of the `script` program included in several *UNIX-like* operating systems/distributions. It records the terminal session capturing timing information to be played later via [`play_terminal_recording`](#play_terminal_recording-alias-playterm).
 
 **NOTE**: Once the recording is started, you can exit by typing the `exit` command
 
@@ -50,7 +50,7 @@ This wrapper, for most cases, will return the exit codes provided by the `script
 ### `play_terminal_recording` (alias `playterm`)
 ![Date Added: 04-MAR-19](https://img.shields.io/badge/date%20added-04--MAR--19-lightgrey.svg)
 
-This function is a wrapper of the `scriptreplay` program included in several *UNIX-like* operating systems/distributions. It plays-back a terminal session recorded using [`record_terminal`](#record_terminal) function.
+This function is a wrapper of the `scriptreplay` program included in several *UNIX-like* operating systems/distributions. It plays-back a terminal session recorded using [`record_terminal`](#record_terminal-alias-recterm) function.
 
 **NOTE:** Once started, you can stop the terminal recording playback hitting `Ctrl + C`
 
