@@ -358,13 +358,14 @@ if [[ "$_os_name" == 'Darwin' ]]; then
                             exiftool -overwrite_original -P -all= "$file_path"
                             exit_code="$?"
                         else
-                            echo 'WARNING: exiftool does not support' \
+                            echo 'WARNING: rmmeta: exiftool does not support' \
                                 '"'"$file_extension"'" files. EXIF metadata,' \
                                 'if any, was not removed' >&2
                         fi
                     else
-                        echo 'WARNING: exiftool command is not present in' \
-                            'this system. EXIF metadata not removed' >&2
+                        echo 'WARNING: rmmeta: exiftool command is not' \
+                            'present in this system. EXIF metadata not' \
+                            'removed' >&2
                     fi
                 fi
             else
@@ -374,6 +375,82 @@ if [[ "$_os_name" == 'Darwin' ]]; then
             fi
         else
             echo 'ERROR: rmmeta: Please provide a file path as the first' \
+                'argument' >&2
+            exit_code=1
+        fi
+
+        return "$exit_code"
+    }
+
+    # Get file system for the root (/)
+    function getrootfs(){
+        local exit_code=0
+
+
+        /usr/libexec/PlistBuddy -c 'Print :FilesystemType' /dev/stdin \
+            <<< $( diskutil info -plist '/' )
+        exit_code="$?"
+
+        return "$exit_code"
+    }
+
+    # Get file tags
+    # TODO: Fix issue when no tags attribute is found
+    # TODO: List the tags 1 per line or comma separated
+    function lstags(){
+        local exit_code=0
+        local file_path="$1"
+
+        if [[ -n "$file_path" ]]; then
+            if [[ -r "$file_path" ]]; then
+                (
+                    set -o pipefail;
+                    xattr -p com.apple.metadata:_kMDItemUserTags "$file_path" \
+                        | xxd -r -p \
+                        | plutil -convert xml1 -o - - \
+                        | xmllint --xpath '/plist/array/*' - \
+                        | cat <(echo '<tags>') - <(echo '</tags>') \
+                        | xmllint --format -
+                )
+                exit_code="$?"
+            else
+                echo 'ERROR: lstags: The provided file is either non' \
+                    'existent or non readable' >&2
+                exit_code=1
+            fi
+        else
+            echo 'ERROR: lstags: Please provide a file path as the first' \
+                'argument' >&2
+            exit_code=1
+        fi
+
+        return "$exit_code"
+    }
+
+    # Get where froms
+    # TODO: Fix issue when no wherefroms attribute is found
+    function wherefroms(){
+        local exit_code=0
+        local file_path="$1"
+
+        if [[ -n "$file_path" ]]; then
+            if [[ -r "$file_path" ]]; then
+                (
+                    set -e -o pipefail;
+                    xattr -p com.apple.metadata:kMDItemWhereFroms \
+                        "$file_path" \
+                        | xxd -r -p \
+                        | plutil -convert xml1 -o - - \
+                        | xmllint --xpath '/plist/array/*/text()' -
+                )
+                exit_code="$?"
+            else
+                echo 'ERROR: wherefroms: The provided file is either non' \
+                    'existent or non readable' >&2
+                exit_code=1
+            fi
+        else
+            echo 'ERROR: wherefroms: Please provide a file path as the first' \
                 'argument' >&2
             exit_code=1
         fi
