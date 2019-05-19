@@ -25,5 +25,6 @@ ln -fns "$real_script_directory"'/.bash_profile' "$HOME"'/.bash_profile'
 ln -fns "$real_script_directory"'/.vimrc' "$HOME"'/.vimrc'
 ln -fns "$real_script_directory"'/.vim/' "$HOME"'/.vim'
 ln -fns "$real_script_directory"'/.inputrc' "$HOME"'/.inputrc'
+ln -fns "$real_script_directory"'/.jq' "$HOME"'/.jq'
 
 exit "$exit_code"

@@ -61,10 +61,10 @@ if [[ "$_is_interactive_shell" -eq 0 ]]; then
     esac
 
     # Disable all SSH auth methods except password
-    alias sshpw='ssh -o PreferredAuthentications=password'
+    alias sshpw='ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o GSSAPIAuthentication=no'
 
     if command -v exiftool &> /dev/null; then
-        alias rmexif='exiftool -all='
+        alias rmexif='exiftool -overwrite_original -P -all='
     fi
 
     # Git aliases

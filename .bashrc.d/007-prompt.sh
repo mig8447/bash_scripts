@@ -3,6 +3,11 @@
 # REQUIRES: mig8447_commons.sh
 
 # Prompt Configuration 
+# TODO: Review an issue where other tools obfuscate the PROMPT_COMMAND exit code
+#       Found the root cause: When installed fasd, it installs a prompt function
+#       _fasd_prompt_func, which gets put before this prompt definition and 
+#       exits with 0, which in turn makes this output 0 in the prompt. I need to
+#       review this in the future
 function _set_prompt {
     local previous_command_exit_code="$?"
     local exit_code=0
@@ -32,5 +37,5 @@ function _set_prompt {
 # shellcheck disable=SC2154
 if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Set the prompt and dump every command to history immediately
-    export PROMPT_COMMAND="_set_prompt; history -a;"
+    export PROMPT_COMMAND="_set_prompt; $PROMPT_COMMAND history -a;"
 fi

@@ -6,7 +6,7 @@ export _os_name
 function _is_interactive_shell(){
     local exit_code=0
 
-    [[ "$-" =~ "i" && -t 0 && -t 1 && -t 2 ]]        
+    [[ "$-" =~ "i" && -t 0 && -t 1 && -t 2 ]]
     exit_code="$?"
 
     return "$exit_code"
@@ -28,7 +28,16 @@ fi
 source "$HOME"'/lib/mig8447_commons.sh'
 
 # Configure the PATH
-append_path_to_path "$HOME/bin"
+append_path_to_path '/sbin'
+append_path_to_path "$HOME"'/bin'
+
+if [[ "$_os_name" == 'Darwin' ]]; then
+    # sleepwatcher binary lives here
+    append_path_to_path '/usr/local/sbin'
+fi
+
+# Personal Directories
+export TERMINAL_TYPESCRIPTS_DIR="$SHOME"'/terminal_typescripts'
 
 # Import all of the non-executable *.sh files in $HOME/.bashrc.d
 while read -r file; do

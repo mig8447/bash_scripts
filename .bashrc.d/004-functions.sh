@@ -111,32 +111,157 @@ function pyhttpserver(){
     return "$exit_code"
 }
 
-if [ "$_os_name" == 'Darwin' ] \
-    && ip help 2>&1 | grep iproute2mac &>/dev/null \
-    && command -v ip &>/dev/null \
-    && command -v jq &>/dev/null
-then
-    # Lists the ipv4s of all the ipv4 network interfaces
-    function lsipv4(){
-        local exit_code=0
+# Find files and directories recursively, as with ls -p, directories are appended a / character
+function findp(){
+    local exit_code=0
+    local path="${1:-.}"
+
+    find -L "$path" \( \( -type d -and -regex '.*?[^/]$' -printf '%p/\n' \) -or -print \)
+
+    exit_code="$?"
+    return "$exit_code"
+}
+
+# Convert string to json
+function str2json(){
+    local exit_code=0
+    local string="$1"
+
+    # jq is much more faster and should be used if available
+    if command -v jq &>/dev/null; then
+        jq -n --arg string "$string" '$string'
+    else
+        echo -n "$string" | python -c 'import json, sys; print( json.dumps( sys.stdin.read() ) )'
+    fi
+
+    return "$exit_code"
+}
+
+# urlencode
+function urlencode(){
+    local exit_code=0
+    local string="$1"
+
+    echo -n "$string" | python -c 'import urllib, sys; print urllib.quote( sys.stdin.read(), "" )'
+    exit_code=$?
+
+    return "$exit_code"
+}
+
+# Lists the ipv4s of all the ipv4 network interfaces
+# TODO: Put the main jq script in a variable to make the code more maintainable
+function lsipv4(){
+    local exit_code=0
+
+    # Function information
+    local long_name='List Interface'"'"'s IPv4'
+    local description='List the IPv4 addresses of all IPv4 enabled network interfaces'
+    local version='1.0.0'
+
+    # Function variables
+    local print_headers=true
+    # All supported jq formats (https://stedolan.github.io/jq/manual/#Formatstringsandescaping)
+    # text, json, html, uri, csv, tsv, sh, base64, and table, (Note base64d is not on the list) which
+    # prints a table using the tsv jq format and then reformatting the output
+    # using the column command
+    local output_format='json'
+    local compact_json=false
+    local output
+
+    # Option parsing variables
+    local option
+    # Needed to localize this variable not to have strange behaviors when
+    # running then function multiple times
+    local OPTIND
+
+    while getopts ":f:cHh" option; do
+        case "$option" in
+            f)
+                output_format="$OPTARG"
+                ;;
+            c)
+                compact_json=true
+                ;;
+            H)
+                print_headers=false
+                ;;
+            h)
+                cat <<-USAGE
+$long_name (${FUNCNAME[0]}) $version
+
+$description
+
+Usage: ${FUNCNAME[0]} [OPTION]...
+
+Options
+    -f    Output format. Accepted values: table, json(*Default), csv, tsv, sh
+    -c    Compact JSON. If output is to be formatted as JSON then instead of
+          producing an array with objects, it will produce a single object
+          where its keys will be the interface name and its values the IPv4
+          values
+    -H    Remove headers from output, except when output is formatted as JSON
+
+Other Options
+    -h    Prints this message and exits
+USAGE
+                return "$exit_code"
+                ;;
+            \?)
+                echo "WARNING: Invalid option -$OPTARG" >&2
+                ;;
+            :)
+                echo "ERROR: Option -$OPTARG requires an argument" >&2
+                exit_code=1
+                ;;
+        esac
+    done
+
+    if [[ "$exit_code" -eq 0 ]]; then
+        # Validate option compatibility
+        if [[ "$output_format" == 'json' ]]; then
+            if [[ "$print_headers" == false ]]; then
+                echo 'WARNING: Output format is set to JSON. Remove headers option will be ignored' >&2
+            fi
+        else
+            if [[ "$compact_json" == true ]]; then
+                echo 'WARNING: Output format is not set to JSON. Compact JSON option will be ignored' >&2
+            fi
+        fi
 
         case "$_os_name" in
             ( Linux )
-                ;;
-            ( Darwin )
-                if ip help 2>&1 \
-                    | grep iproute2mac &>/dev/null \
-                    && command -v ip &>/dev/null \
+                if command -v ip &>/dev/null \
                     && command -v jq &>/dev/null
                 then
-                    (
+                    output="$(
+                        set -o pipefail;
+                        # Show the avilable ipv4 addresses
+                        ip -4 address show \
+                            | perl -0777 -ne 'print "\n$2\t$3" while /([^:]+?:\s+)?([^:]+?):(?:.*?)((?<=inet\s)[^\s\/]+).*?\2/sg' \
+                            | tail -n +2 \
+                            | jq -Rs '. | split("\n") | map( split("\t") | { interface_name: .[0], ipv4: .[1] } )'
+                    )"
+                    exit_code="$?"
+                else
+                    echo 'ERROR: ip command from iproute2 and jq are required' >&2
+                    exit_code=1
+                fi
+                ;;
+            ( Darwin )
+                if command -v ip &>/dev/null \
+                    &&  ip help 2>&1 \
+                        | grep iproute2mac &>/dev/null \
+                    && command -v jq &>/dev/null
+                then
+                    output="$(
                         set -o pipefail;
                         # Show the avilable ipv4 addresses
                         ip -4 address show \
                             | perl -0777 -ne 'print "\n$1\t$2" while /([^:]+?):(?:.*?)((?<=inet\s)[^\s\/]+).*?\1/sg' \
                             | tail -n +2 \
-                            | jq -Rs '. | split("\n") | map( split("\t") | { key: .[0], value: .[1] } ) | from_entries'
-                    )
+                            | jq -Rs '. | split("\n") | map( split("\t") | { interface_name: .[0], ipv4: .[1] } )'
+                    )"
+                    exit_code="$?"
                 else
                     echo 'ERROR: iproute2mac and jq are required. Install them using homebrew' >&2
                     exit_code=1
@@ -144,19 +269,39 @@ then
                 ;;
         esac
 
-        (
-            set -o pipefail;
-            # Show the avilable ipv4 addresses
-            ip -4 address show \
-                | perl -0777 -ne 'print "\n$1\t$2" while /([^:]+?):(?:.*?)((?<=inet\s)[^\s\/]+).*?\1/sg' \
-                | tail -n +2 \
-                | jq -Rs '. | split("\n") | map( split("\t") | { key: .[0], value: .[1] } ) | from_entries'
+        if [[ "$exit_code" -eq 0 ]]; then
+            # Assuming we have utilities.jq module (Which contains the
+            # array_of_simple_objects_to_format function) at ~/.jq/utilities.jq
+            # which is true for bash_scripts repo
+            case "$output_format" in
+                json )
+                    if [[ "$compact_json" == true ]]; then
+                        output="$( jq 'map( { key: .interface_name, value: .ipv4 } ) | from_entries' <<< "$output" )"
+                    fi
+                    ;;
+                table )
+                    output="$(
+                        set -o pipefail;
+                        jq -r 'import "utilities" as u; . | u::array_of_simple_objects_to_format( @tsv )' <<< "$output" \
+                            | column -ts $'\t'
+                    )"
+                    exit_code="$?"
+                    ;;
+                * )
+                    output="$( jq -r 'import "utilities" as u; . | u::array_of_simple_objects_to_format( @'"$output_format"' )' <<< "$output" )"
+                    exit_code="$?"
+                    ;;
+            esac
 
-#ip -4 address show | perl -0777 -ne 'print "\n$2\t$3" while /([^:]+?:\s+)?([^:]+?):(?:.*?)((?<=inet\s)[^\s\/]+).*?\2/sg' | tail -n +2 | jq -Rs '. | split("\n") | map( split("\t") | { key: .[0], value: .[1] } ) | from_entries'
-        )
-        exit_code="$?"
+            if [[ "$print_headers" == false && "$output_format" =~ html|uri|csv|tsv|sh|base64|table ]]; then
+                output="$( tail -n +2 <<< "$output" )"
+                exit_code="$?"
+            fi
 
-        return "$exit_code"
-    }
-fi
+            cat <<< "$output"
+        fi
+    fi
+
+    return "$exit_code"
+}
 
