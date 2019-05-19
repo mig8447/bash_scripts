@@ -136,7 +136,6 @@ function str2json(){
 
     return "$exit_code"
 }
-
 # urlencode
 function urlencode(){
     local exit_code=0
@@ -305,3 +304,80 @@ USAGE
     return "$exit_code"
 }
 
+# Only for macOS
+if [[ "$_os_name" == 'Darwin' ]]; then
+    # Remove metadata from file
+    function rmmeta(){
+        local exit_code=0
+        local file_path="$1"
+        local file_extension
+        local exiftool_supported_extensions
+
+        if [[ -n "$file_path" ]]; then
+            if [[ -f "$file_path" && -w "$file_path" ]]; then
+                file_extension="$( \
+                    # - Get the file name only without the directories
+                    # - Get a dot followed by at least one non-dot
+                    #   character located at the end of the string, aka get
+                    #   the file extension
+                    # - Remove the initial dot
+                    basename "$file_path" \
+                        | grep -o '[.][^.][^.]*$' \
+                        | sed -Ee 's/^[.]//' \
+                )"
+
+                xattr -c "$file_path"
+                exit_code="$?"
+
+                if [[ "$exit_code" -eq 0 ]]; then
+                    # We require a file extension to compare to the exiftool
+                    # supported ones
+                    if [[ -n "$file_extension" ]] \
+                        && command -v exiftool &>/dev/null
+                    then
+                        exiftool_supported_extensions="$( \
+                            # - Get the exiftool supported writeable extensions
+                            # - Remove the header
+                            # - Remove leading an trailing spaces from each
+                            #   line
+                            # - Replace the space characters with new line
+                            #   characters to make a single column list
+                            exiftool -listwf 2>/dev/null \
+                                | tail -n +2 \
+                                | sed -Ee 's/(^[ ]+)|([ ]+$)//' \
+                                | tr ' ' $'\n' \
+                        )"
+
+                        # Check if the current file extension is in the list of
+                        # exiftool's supported writeable extensions
+                        if grep -i "$file_extension" \
+                            <<< "$exiftool_supported_extensions" &>/dev/null
+                        then
+                            # Remove the EXIF metadata preserving the 
+                            # modification time. Do not generate a backup file
+                            exiftool -overwrite_original -P -all= "$file_path"
+                            exit_code="$?"
+                        else
+                            echo 'WARNING: exiftool does not support' \
+                                '"'"$file_extension"'" files. EXIF metadata,' \
+                                'if any, was not removed' >&2
+                        fi
+                    else
+                        echo 'WARNING: exiftool command is not present in' \
+                            'this system. EXIF metadata not removed' >&2
+                    fi
+                fi
+            else
+                echo 'ERROR: rmmeta: The provided file is either non' \
+                    'existent, not a file or non writeable' >&2
+                exit_code=1
+            fi
+        else
+            echo 'ERROR: rmmeta: Please provide a file path as the first' \
+                'argument' >&2
+            exit_code=1
+        fi
+
+        return "$exit_code"
+    }
+fi
