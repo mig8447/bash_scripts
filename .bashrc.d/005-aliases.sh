@@ -51,6 +51,8 @@ if [[ "$_is_interactive_shell" -eq 0 ]]; then
     alias recterm='record_terminal'
     alias playterm='play_terminal_recording'
 
+    alias nohistorysh='bash --rcfile "$HOME"'"'"'/.bashrc_nohistory'"'"
+
     case "${_os_name:-Linux}" in
         Linux )
             alias md5='md5sum'

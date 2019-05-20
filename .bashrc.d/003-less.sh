@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Less Setup
-export LESS='-P%f - line %l$'
+export LESS='-R -P%f - line %l$'

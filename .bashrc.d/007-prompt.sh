@@ -15,6 +15,10 @@ function _set_prompt {
     # Prompt string: <START_BOLD_TEXT>[<USER>@<SHORT_HOSTNAME>
     PS1='\[\033[1m\][\u@\h '
 
+    if [[ -n "${_shell_mode+set}" ]]; then
+        PS1="$PS1"'\[\033[7m\]'"$_shell_mode"'\[\033[27m\] '
+    fi
+
     # Prompt + <START_CYAN_TEXT><CWD><RESET_ATTRIBUTES><START_BOLD_TEXT>](
     PS1="$PS1"'\[\033[36m\]\W\[\033[0m\]\[\033[1m\]]('
 

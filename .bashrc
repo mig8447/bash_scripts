@@ -37,7 +37,7 @@ if [[ "$_os_name" == 'Darwin' ]]; then
 fi
 
 # Personal Directories
-export TERMINAL_TYPESCRIPTS_DIR="$SHOME"'/terminal_typescripts'
+export TERMINAL_TYPESCRIPTS_DIR="$HOME"'/terminal_typescripts'
 
 # Import all of the non-executable *.sh files in $HOME/.bashrc.d
 while read -r file; do
@@ -67,4 +67,3 @@ done < <(
         && test -e "${HOME}/.iterm2_shell_integration.bash" \
         && source "${HOME}/.iterm2_shell_integration.bash";
 } || ( exit 0 )
-
