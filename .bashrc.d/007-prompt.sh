@@ -16,7 +16,7 @@ function _set_prompt {
     PS1='\[\033[1m\][\u@\h '
 
     if [[ -n "${_shell_mode+set}" ]]; then
-        PS1="$PS1"'\[\033[7m\]'"$_shell_mode"'\[\033[27m\] '
+        PS1="$PS1"'\[\033[7m\] '"$_shell_mode"' \[\033[27m\] '
     fi
 
     # Prompt + <START_CYAN_TEXT><CWD><RESET_ATTRIBUTES><START_BOLD_TEXT>](

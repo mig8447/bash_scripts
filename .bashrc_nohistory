@@ -1,11 +1,21 @@
 #!/bin/bash
 
-export _shell_mode='nohistory'
+# Only set the _shell_mode if it has not already been set
+if [[ -z "${_shell_mode+set}" || "$_inherit_shell_mode" != true ]]; then
+    export _shell_mode='nohistory'
+fi
 
 if [[ -f "$HOME"'/.bashrc' ]]; then
     # shellcheck disable=SC1090
     source "$HOME"'/.bashrc'
 fi
 
+_original_histfile="$HISTFILE"
 # If HISTFILE is unset then history is not recorded
 unset HISTFILE
+# Make your previous history available
+# Read any non-read history line from the original history file
+history -n "$_original_histfile"
+# Remove the variable
+unset _original_histfile
+

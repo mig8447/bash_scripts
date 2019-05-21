@@ -41,10 +41,19 @@ if [[ "$_is_interactive_shell" -eq 0 ]]; then
     # Replace the contents of a file in paste mode
     alias vimreplace='vim -c '"'"'1,$d'"'"' -c '"'"'set noexpandtab'"'"' -c '\
 "'"'set paste'"'"' -c '"'"'startinsert'"'"
+
+    _rc_file_name='.bashrc'
+    if [[ -n "${_shell_mode+set}" ]]; then
+        # If a shell mode is set then append the shell mode name to the rc file
+        # name
+        _rc_file_name="$_rc_file_name"'_'"$_shell_mode"
+    fi
     # Edit the .bashrc file
-    alias vimrc='vim "$HOME"'"'"'/.bashrc'"'"
+    alias vimrc='vim "$HOME"'"'/""$_rc_file_name""'"
     # Source the .bashrc file
-    alias sourcerc='source "$HOME"'"'"'/.bashrc'"'"
+    alias sourcerc='source "$HOME"'"'/""$_rc_file_name""'"
+    unset _rc_file_name
+
     # Interactive alias for rm
     alias rm='confirm_rm'
 

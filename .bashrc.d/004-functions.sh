@@ -306,12 +306,56 @@ USAGE
 
 # Only for macOS
 if [[ "$_os_name" == 'Darwin' ]]; then
+    # Get the last file added to the current working directory
+    function lastaddedfile(){
+        local exit_code=0
+        local file_type_option="$1"
+        local find_type_flag=''
+
+        if [[ -n "$file_type_option" ]]; then
+            case "$file_type_option" in
+                ( --files )
+                    find_type_flag='-type f '
+                    ;;
+                ( --directories )
+                    find_type_flag='-type d '
+            esac
+        fi
+
+        (
+            set -o pipefail;
+            # Find files and folders in the current directory
+            # Get the inode change date and name of each file separated by tab
+            # Sort the result by date
+            # Only get the last from the set
+            # Get the file path
+            # Get the file name only
+            basename "$( \
+                find -L "$PWD" $find_type_flag -maxdepth 1 -not -path "$PWD" \
+                    -exec stat -f '%Sc'$'\t''%SN' -t '%Y-%m-%dT%H:%M:%S' {} \
+                    ';' \
+                    | sort -nk1,1 \
+                    | tail -n 1 \
+                    | cut -f 2 \
+            )"
+            exit_code="$?"
+        )
+
+        return "$exit_code"
+    }
+
     # Remove metadata from file
     function rmmeta(){
         local exit_code=0
         local file_path="$1"
         local file_extension
         local exiftool_supported_extensions
+
+        if [[ -z "$file_path" ]]; then
+            echo "WARNING: rmmeta: No file path provided, assuming last" \
+                "added file in the current directory" >&2
+            file_path="$( lastaddedfile --files )"
+        fi
 
         if [[ -n "$file_path" ]]; then
             if [[ -f "$file_path" && -w "$file_path" ]]; then
@@ -326,10 +370,14 @@ if [[ "$_os_name" == 'Darwin' ]]; then
                         | sed -Ee 's/^[.]//' \
                 )"
 
+                echo 'INFO: rmmeta: Removing extended attributes from' \
+                    '"'"$file_path"'"...'
                 xattr -c "$file_path"
                 exit_code="$?"
 
                 if [[ "$exit_code" -eq 0 ]]; then
+                    echo 'INFO: rmmeta: Extended attributes removed' \
+                        'successfully'
                     # We require a file extension to compare to the exiftool
                     # supported ones
                     if [[ -n "$file_extension" ]] \
@@ -348,6 +396,8 @@ if [[ "$_os_name" == 'Darwin' ]]; then
                                 | tr ' ' $'\n' \
                         )"
 
+                        echo 'INFO: rmmeta: Removing EXIF metadata from' \
+                            '"'"$file_path"'"...'
                         # Check if the current file extension is in the list of
                         # exiftool's supported writeable extensions
                         if grep -i "$file_extension" \
@@ -357,6 +407,16 @@ if [[ "$_os_name" == 'Darwin' ]]; then
                             # modification time. Do not generate a backup file
                             exiftool -overwrite_original -P -all= "$file_path"
                             exit_code="$?"
+
+                            if [[ "$exit_code" -eq 0 ]]; then
+                                echo 'INFO: rmmeta: EXIF metadata removed' \
+                                    'successfully'
+                            else
+                                echo 'ERROR: rmmeta: An error occurred while' \
+                                    'removing the EXIF metadata from the' \
+                                    'file' >&2
+                                exit_code=1
+                            fi
                         else
                             echo 'WARNING: rmmeta: exiftool does not support' \
                                 '"'"$file_extension"'" files. EXIF metadata,' \
@@ -367,15 +427,18 @@ if [[ "$_os_name" == 'Darwin' ]]; then
                             'present in this system. EXIF metadata not' \
                             'removed' >&2
                     fi
+                else
+                    echo 'ERROR: rmmeta: An error occurred while removing' \
+                        'the extended attributes from the file' >&2
+                        exit_code=1
                 fi
             else
-                echo 'ERROR: rmmeta: The provided file is either non' \
+                echo 'ERROR: rmmeta: File at "'"$file_path"'" is either non' \
                     'existent, not a file or non writeable' >&2
                 exit_code=1
             fi
         else
-            echo 'ERROR: rmmeta: Please provide a file path as the first' \
-                'argument' >&2
+            echo 'ERROR: rmmeta: Could not obtain the last added file path' >&2
             exit_code=1
         fi
 

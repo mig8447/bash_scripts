@@ -20,7 +20,7 @@ ln -fns "$real_script_directory"'/lib/mig8447_commons.sh' \
 ln -fns "$real_script_directory"'/lib/isiterm2.sh' \
     "$HOME"'/lib/isiterm2.sh'
 ln -fns "$real_script_directory"'/.bashrc' "$HOME"'/.bashrc'
-ln -fns "$real_script_directory"'/.bashrc' "$HOME"'/.bashrc_nohistory'
+ln -fns "$real_script_directory"'/.bashrc_nohistory' "$HOME"'/.bashrc_nohistory'
 ln -fns "$real_script_directory"'/.bashrc.d/' "$HOME"'/.bashrc.d'
 ln -fns "$real_script_directory"'/.bash_profile' "$HOME"'/.bash_profile'
 ln -fns "$real_script_directory"'/.vimrc' "$HOME"'/.vimrc'
