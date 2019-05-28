@@ -27,7 +27,7 @@ if [ -s "$HOME""/.vimrc" ]; then
 fi
 
 if [ -d "$HOME""/.vim" ]; then
-    cp -R "$HOME"/.vim "$HOME"/.vim_bkup
+    cp -rL "$HOME"/.vim "$HOME"/.vim_bkup/
     echo "Backup created for .vim/ dir"
 fi
 
