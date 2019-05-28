@@ -12,9 +12,30 @@ else
     real_script_directory="$script_directory"
 fi
 
-# TODO: Create backups of the original files if any
+#Create backups of the original files if any
+if [ -s "$HOME""/.bashrc" ]; then 
+    cp "$HOME"/.bashrc "$HOME"/.bashrc.scriptbkup
+    echo "Backup created for .bashrc file"
+fi
+if [ -s "$HOME""/.bash_profile" ]; then 
+    cp "$HOME"/.bash_profile "$HOME"/.bash_profile.scriptbkup
+    echo "Backup created for .bash_profile file"
+fi
+if [ -s "$HOME""/.vimrc" ]; then
+    cp "$HOME"/.vimrc "$HOME"/.vimrc
+    echo "Backup created for .vimrc file"
+fi
 
-mkdir -p "$real_script_directory"'/lib'
+if [ -d "$HOME""/.vim" ]; then
+    cp -R "$HOME"/.vim "$HOME"/.vim_bkup
+    echo "Backup created for .vim/ dir"
+fi
+
+if [ ! -d "$HOME""/lib" ]; then
+    mkdir -p "$HOME"'/lib'
+fi
+
+#Create symlinks 
 ln -fns "$real_script_directory"'/lib/mig8447_commons.sh' \
     "$HOME"'/lib/mig8447_commons.sh'
 ln -fns "$real_script_directory"'/lib/isiterm2.sh' \
